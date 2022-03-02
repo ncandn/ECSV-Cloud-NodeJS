@@ -5,11 +5,11 @@ router.get("/GetDevices", edgeController.getDevices);
 
 router.get("/GetInfo/:id", edgeController.getInfo);
 
-router.get("/CreateDevice", edgeController.createDevice);
+router.post("/CreateDevice", edgeController.createDevice);
 
-router.get("/SaveDevice", edgeController.saveDevice);
+router.put("/SaveDevice/:id", edgeController.registerDeviceProp);
 
-router.get("/UpdateReading", edgeController.updateReading);
+router.put("/UpdateReading/:id", edgeController.updateReading);
 
 router.delete("/RemoveDevice/:id", edgeController.removeDevice);
 

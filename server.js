@@ -1,7 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
 const app = express();
 require("dotenv").config();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect(process.env.DATABASE_URI || "mongodb://localhost/api", {
     useNewUrlParser: true,
@@ -21,7 +25,8 @@ app.get("/", function (req, res, next) {
     res.status(200).send("CONNECTED - ECSV DATABASE SERVER");
 });
 
-app.use("/api/*", function (req, res, next) {
+// HTTP BLOCKER
+app.use("/api/auth/*", function (req, res, next) {
     res.status(511).json({
         error: true,
         message: "Not Authorized"

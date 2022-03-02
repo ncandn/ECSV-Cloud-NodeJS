@@ -15,17 +15,28 @@ const getDevices = async (req, res, next) => {
 };
 
 const createDevice = async (req, res, next) => {
-    try {
-        const deviceExists = await Device.exists({id: 911});
+    const deviceID = req.body?.deviceID;
+    const deviceName = req.body?.deviceName;
 
-        if (!deviceExists) {
-            const newDevice = await Device.create({
-                id: 911,
-                name: "Demo Device"
-            });
-            res.status(201).json(newDevice);
+    try {
+        if (deviceID) {
+            const deviceExists = await Device.exists({id: deviceID});
+
+            if (!deviceExists) {
+                const newDevice = await Device.create({
+                    id: deviceID,
+                    name: deviceName || "ECSV Device"
+                });
+
+                res.status(201).json(newDevice);
+            } else {
+                res.status(200).json({
+                    error: false,
+                    message: "Device already exists."
+                });
+            }
         } else {
-            throw new Error("Device already exists.");
+            throw new Error("No specified device ID.");
         }
     } catch (err) {
         res.status(400).json({
@@ -33,67 +44,99 @@ const createDevice = async (req, res, next) => {
             message: err.message
         });
     }
+
+    next();
 };
 
-const saveDevice = async (req, res, next) => {
-    try {
-        const sensorExists = await Sensor.findOne({id: 977});
-        const device = await Device.findOne({id: 911});
+const registerDeviceProp = async (req, res, next) => {
+    const deviceID = req.params?.id;
+    const incomingSensor = {
+        id: req.body?.sensorID,
+        type: req.body?.type
+    };
 
-        if (!sensorExists && device) {
-            const sensor = await Sensor.create({
-                id: 977,
-                type: "temperature",
-                device: device._id
-            });
-            device.sensors.push(sensor);
-            await device.save();
-            res.status(201).json(sensor);
+    try {
+        if (deviceID && incomingSensor) {
+            const sensorExists = await Sensor.findOne({id: incomingSensor.id});
+            const device = await Device.findOne({id: deviceID});
+    
+            if (!sensorExists && device) {
+                const sensor = await Sensor.create({
+                    id: incomingSensor.id,
+                    type: incomingSensor.type,
+                    device: device._id
+                });
+
+                device.sensors.push(sensor);
+                await device.save();
+
+                res.status(201).json(sensor);
+            } else {
+                throw new Error("Couldn't save sensor.");
+            }
         } else {
-            throw new Error("Couldn't save sensor.");
+            throw new Error("No information provided.");
         }
     } catch (err) {
-        res.status(400).send(err.message);
+        res.status(400).json({
+            error: true,
+            message: err.message
+        });
     }
+
+    next();
 };
 
 const updateReading = async (req, res, next) => {
-    try {
-        const sensor = await Sensor.findOne({id: 977});
+    const sensorID = req.params?.id;
+    console.log(req.params?.id)
+    const readings = {
+        unit: req.body?.unit,
+        value: req.body?.value
+    };
 
-        if (sensor) {
+    try {
+        if (!sensorID) {
+            throw new Error("No specified sensor ID.");
+        }
+
+        const newSensor = await Sensor.findOne({id: sensorID});
+
+        if (newSensor) {
+            const prevReading = await Reading.findOne({sensor: newSensor._id});
+            if (prevReading) {
+                await Reading.deleteOne({sensor: newSensor._id, unit: readings.unit});
+                console.log("Previous reading is deleted successfully.");
+            }
+
             const reading = await Reading.create({
-                unit: "celcius",
-                value: 30,
-                sensor: sensor._id
+                unit: readings.unit,
+                value: readings.value,
+                sensor: newSensor._id
             });
 
-            sensor.reading = reading;
-            await sensor.save();
+            newSensor.reading = reading;
+            await newSensor.save();
 
-            const device = await Device.findOne({_id: sensor.device._id}).populate("sensors");
-            console.log(sensor)
-            console.log(device)
+            const device = await Device.findOne({_id: newSensor.device._id}).populate("sensors");
+
             for (var sn in device.sensors) {
-                console.log(sn)
-                console.log(device.sensors[sn]._id)
-                console.log(sensor._id)
-                console.log(sensor._id.equals(device.sensors[sn]._id))
-                if (sensor._id.equals(device.sensors[sn]._id)) {
-                    device.sensors[sn] = sensor;
-                    console.log("yeah")
+                if (newSensor._id.equals(device.sensors[sn]._id)) {
+                    device.sensors[sn] = newSensor;
                     break;
                 }
             }
-            //console.log(device)
+
             await device.save();
-            res.status(201).json(sensor);
+            res.status(201).json(newSensor);
         } else {
             throw new Error("Couldn't find sensor.");
         }
     } catch (err) {
         res.status(400).send(err.message);
     }
+
+    next();
 };
 
 const removeDevice = async (req, res, next) => {
@@ -112,4 +155,4 @@ const getInfo = async (req, res, next) => {
     }
 };
 
-module.exports = { getDevices, createDevice, updateReading, saveDevice, removeDevice, getInfo };
+module.exports = { getDevices, createDevice, updateReading, registerDeviceProp, removeDevice, getInfo };
