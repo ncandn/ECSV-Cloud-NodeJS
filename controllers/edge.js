@@ -148,11 +148,27 @@ const removeDevice = async (req, res, next) => {
 };
 
 const getInfo = async (req, res, next) => {
+    var deviceID = req.params?.id;
+
     try {
-
+        if (deviceID) {
+            const device = await Device.findOne({id: deviceID});
+            if (device) {
+                res.status(200).json(device);
+            } else {
+                throw new Error("Device could not be found.");
+            }
+        } else {
+            throw new Error("No specified device ID.");
+        }
     } catch (err) {
-
+        res.status(500).json({
+            error: true,
+            message: err.message,
+        });
     }
+    
+    next();
 };
 
 module.exports = { getDevices, createDevice, updateReading, registerDeviceProp, removeDevice, getInfo };
