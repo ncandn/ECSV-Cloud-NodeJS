@@ -1,5 +1,7 @@
+"use strict";
+
 const router = require("express").Router();
-const edgeController = require("../controllers/edge")
+const edgeController = require("../controllers/edge");
 
 router.get("/GetDevices", edgeController.getDevices);
 

@@ -1,19 +1,18 @@
+"use strict";
+
 const mongoose = require("mongoose");
+const { Device } = require("../models/device");
 
 const userSchema = new mongoose.Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true
-    },
-    name: {
+    email: {
         type: String,
-        required: false
+        required: true
     },
-    devices: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Device"
-    }]
+    password: {
+        type: String,
+        required: true
+    },
+    devices: [Device.schema]
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -1,3 +1,5 @@
+"use strict";
+
 const { Device } = require("../models/device");
 const { Sensor } = require("../models/device");
 const { Reading } = require("../models/device");
@@ -12,6 +14,8 @@ const getDevices = async (req, res, next) => {
             message: err.message,
         });
     }
+
+    next();
 };
 
 const createDevice = async (req, res, next) => {
