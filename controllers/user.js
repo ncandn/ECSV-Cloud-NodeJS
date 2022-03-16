@@ -32,7 +32,7 @@ const saveUser = async (req, res, next) => {
         if (email && password) {
             const user = await User.exists({email: email});
             if (!user) {
-                let device = await Device.findOne({id: "8138108"});
+                let device = await Device.findOne({id: "1112"});
 
                 let newUser = await User.create({
                     email: email,
