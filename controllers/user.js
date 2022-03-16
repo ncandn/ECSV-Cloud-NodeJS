@@ -3,13 +3,30 @@
 const User = require("../models/user");
 const { Device } = require("../models/device");
 
+const getUser = async (req, res, next) => {
+    const email = req.params?.email;
+
+    try {
+        const user = await User.findOne({email: email});
+
+        if (!user) {
+            throw new Error("User not found.");
+        }
+
+        res.json(user);
+    } catch (err) {
+        res.status(400).json({
+            error: true,
+            message: err.message
+        });
+    }
+
+    next();
+};
+
 const saveUser = async (req, res, next) => {
     const email = req.body?.email;
     const password = req.body?.password;
-
-    console.log(email);
-    console.log(password);
-
 
     try {
         if (email && password) {
@@ -43,4 +60,4 @@ const saveUser = async (req, res, next) => {
     next();
 };
 
-module.exports = { saveUser };
+module.exports = { saveUser, getUser };
