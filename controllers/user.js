@@ -4,7 +4,7 @@ const User = require("../models/user");
 const { Device } = require("../models/device");
 
 const getUser = async (req, res, next) => {
-    const email = req.params?.email;
+    const email = req.query?.email;
 
     try {
         const user = await User.findOne({email: email});
