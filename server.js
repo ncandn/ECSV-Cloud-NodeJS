@@ -37,7 +37,5 @@ app.use("/testapi/edge", testRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/edge", edgeRouter);
 
-const server = app.listen(process.env.PORT || 3000, () => {
-    console.log(`Server listening on port ${process.env.PORT || 3000}.`);
-});
+const server = app.listen(process.env.PORT || 3000);
 module.exports = server;
