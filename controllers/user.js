@@ -2,6 +2,7 @@
 
 const User = require("../models/user");
 const { Device } = require("../models/device");
+const crypto = require("crypto");
 
 const getUser = async (req, res, next) => {
     const email = req.query?.email;
@@ -12,6 +13,20 @@ const getUser = async (req, res, next) => {
         if (!user) {
             throw new Error("User not found.");
         }
+
+        //let iv = crypto.randomBytes(16);
+        var iv = "1234567812345678";
+
+        var key = "12345678123456781234567812345678";
+    
+        let decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
+
+        let decrypted = decipher.update(user.password, "hex", "utf-8");
+
+        decrypted += decipher.final("utf-8");
+
+
+        console.log(decrypted);
 
         res.json(user);
     } catch (err) {
@@ -31,6 +46,7 @@ const saveUser = async (req, res, next) => {
     try {
         if (email && password) {
             const user = await User.exists({email: email});
+            
             if (!user) {
                 let device = await Device.findOne({id: "1112"});
 

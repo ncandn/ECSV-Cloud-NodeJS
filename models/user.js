@@ -2,6 +2,7 @@
 
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const SALT_WORK_FACTOR = 10;
 const { Device } = require("../models/device");
 
@@ -19,18 +20,23 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre("save", function(next) {
     var user = this;
-
     if (!user.isModified("password")) return next();
 
-    bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-        if (err) return next(err);
+    try {
+        //var iv = crypto.randomBytes(16);
+        var iv = "1234567812345678";
+        
+        var key = "12345678123456781234567812345678";
+    
+        var cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+        var encrypted = cipher.update(user.password, "utf-8", "hex");
+        encrypted += cipher.final("hex");
+        user.password = encrypted;
+    } catch (err) {
+        console.error(err);
+    }
 
-        bcrypt.hash(user.password, salt, function(err, hash) {
-            if (err) return next(err);
-            user.password = hash;
-            next();
-        });
-    });
+    next();
 });
 
 module.exports = mongoose.model("User", userSchema);
