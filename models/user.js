@@ -25,7 +25,7 @@ userSchema.pre("save", function(next) {
     try {
         //var iv = crypto.randomBytes(16);
         var iv = "1234567812345678";
-        
+
         var key = "12345678123456781234567812345678";
     
         var cipher = crypto.createCipheriv("aes-256-cbc", key, iv);

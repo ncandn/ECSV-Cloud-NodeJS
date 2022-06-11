@@ -45,6 +45,11 @@ const deviceSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    status: {
+        type: String,
+        enum: ["Pending", "Owned"],
+        required: true
+    },
     registrationDate: {
         type: Date,
         required: true,

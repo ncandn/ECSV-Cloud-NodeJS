@@ -2,8 +2,9 @@
 
 const router = require("express").Router();
 const edgeController = require("../controllers/edge");
+const middleware = require("../scripts/middleware/token");
 
-router.get("/GetDevices", edgeController.getDevices);
+router.get("/GetDevices", middleware.verifyToken, edgeController.getDevices);
 
 router.get("/GetInfo/:id", edgeController.getInfo);
 

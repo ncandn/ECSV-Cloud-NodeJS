@@ -3,10 +3,16 @@
 const { Device } = require("../models/device");
 const { Sensor } = require("../models/device");
 const { Reading } = require("../models/device");
+const User = require("../models/user");
 
 const getDevices = async (req, res, next) => {
     try {
-        const devices = await Device.find();
+        const user = await User.findOne({email: req.user.email});
+        if (!user) {
+            throw new Error("User's not found.");
+        }
+
+        let devices = user.devices;
         res.json(devices);
     } catch (err) {
         res.status(500).json({
@@ -29,7 +35,8 @@ const createDevice = async (req, res, next) => {
             if (!deviceExists) {
                 const newDevice = await Device.create({
                     id: deviceID,
-                    name: deviceName || "ECSV Device"
+                    name: deviceName || "ECSV Device",
+                    status: "Pending"
                 });
 
                 res.status(201).json(newDevice);
@@ -63,7 +70,7 @@ const registerDeviceProp = async (req, res, next) => {
         if (deviceID && incomingSensor) {
             const sensorExists = await Sensor.findOne({id: incomingSensor.id});
             const device = await Device.findOne({id: deviceID});
-    
+
             if (!sensorExists && device) {
                 const sensor = await Sensor.create({
                     id: incomingSensor.id,
