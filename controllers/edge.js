@@ -4,6 +4,8 @@ const { Device } = require("../models/device");
 const { Sensor } = require("../models/device");
 const { Reading } = require("../models/device");
 const User = require("../models/user");
+const Crypto = require("crypto");
+const DEVICE_HMAC = process.env.DEVICE_HMAC;
 
 const getDevices = async (req, res, next) => {
     try {
@@ -30,11 +32,12 @@ const createDevice = async (req, res, next) => {
 
     try {
         if (deviceID) {
-            const deviceExists = await Device.exists({id: deviceID});
+            var deviceHMAC = Crypto.createHmac("sha256", DEVICE_HMAC).update(deviceID).digest("hex");
+            const deviceExists = await Device.exists({id: deviceHMAC});
 
             if (!deviceExists) {
                 const newDevice = await Device.create({
-                    id: deviceID,
+                    id: deviceHMAC,
                     name: deviceName || "ECSV Device",
                     status: "Pending"
                 });
@@ -68,8 +71,9 @@ const registerDeviceProp = async (req, res, next) => {
 
     try {
         if (deviceID && incomingSensor) {
+            var deviceHMAC = Crypto.createHmac("sha256", DEVICE_HMAC).update(deviceID).digest("hex");
             const sensorExists = await Sensor.findOne({id: incomingSensor.id});
-            const device = await Device.findOne({id: deviceID});
+            const device = await Device.findOne({id: deviceHMAC});
 
             if (!sensorExists && device) {
                 const sensor = await Sensor.create({
@@ -150,27 +154,41 @@ const updateReading = async (req, res, next) => {
     next();
 };
 
-const removeDevice = async (req, res, next) => {
-    try {
-
-    } catch (err) {
-
-    }
-};
-
 const getInfo = async (req, res, next) => {
-    var deviceID = req.params?.id;
+    const deviceID = req.params?.id;
+    const email = req.user && req.user.email ? req.user.email : null;
 
     try {
-        if (deviceID) {
-            const device = await Device.findOne({id: deviceID});
-            if (device) {
-                res.status(200).json(device);
-            } else {
+        if (deviceID && email) {
+            var deviceHMAC = Crypto.createHmac("sha256", DEVICE_HMAC).update(deviceID).digest("hex");
+            const device = await Device.findOne({id: deviceHMAC});
+
+            if (!device) {
                 throw new Error("Device could not be found.");
             }
+            
+            const user = await User.findOne({email: email});
+            if (!user) {
+                throw new Error("User could not be found.");
+            }
+
+            var userHasDevice = false;
+            user.devices.forEach((element) => {
+                if (element._id.equals(device._id)) {
+                    userHasDevice = true;
+                }
+            });
+
+            if (userHasDevice) {
+                res.status(200).json(device);
+            } else {
+                res.status(404).json({
+                    error: true,
+                    message: "Device could not be found."
+                });
+            }
         } else {
-            throw new Error("No specified device ID.");
+            throw new Error("No information provided.");
         }
     } catch (err) {
         res.status(500).json({
@@ -178,8 +196,8 @@ const getInfo = async (req, res, next) => {
             message: err.message,
         });
     }
-    
+
     next();
 };
 
-module.exports = { getDevices, createDevice, updateReading, registerDeviceProp, removeDevice, getInfo };
+module.exports = { getDevices, createDevice, updateReading, registerDeviceProp, getInfo };

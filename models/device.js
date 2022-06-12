@@ -38,7 +38,7 @@ const sensorSchema = new mongoose.Schema({
 
 const deviceSchema = new mongoose.Schema({
     id: {
-        type: Number,
+        type: String,
         required: true
     },
     name: {

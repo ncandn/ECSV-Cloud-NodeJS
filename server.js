@@ -19,13 +19,12 @@ db.once("open", () => console.log("Connection is successful."));
 
 const authRouter = require("./routes/auth");
 const edgeRouter = require("./routes/edge");
-const testRouter = require("./routes/test");
 
 app.get("/", function (req, res, next) {
     res.status(200).send("CONNECTED - ECSV DATABASE SERVER");
 });
 
-// HTTP BLOCKER
+// HTTP BLOCKER - REMOVE COMMENT BELOW TO DEACTIVATE SERVER BRIEFLY
 /*app.use("/api/auth/*", function (req, res, next) {
     res.status(511).json({
         error: true,
@@ -33,7 +32,6 @@ app.get("/", function (req, res, next) {
     });
 });*/
 
-app.use("/testapi/edge", testRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/edge", edgeRouter);
 

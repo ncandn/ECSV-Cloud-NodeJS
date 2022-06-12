@@ -1,13 +1,29 @@
 "use strict";
 
-const crypto = require("crypto");
+const Crypto = require("crypto");
+const AES_256_GCM = "aes-256-gcm";
 
-function func() {
-    if (crypto) {
-        console.log(crypto.getCiphers());
-    }
-}
+const encryptDataAES256GCM = (message, key, iv) => {
+    var cipher = Crypto.createCipheriv(AES_256_GCM, key, iv);
+    var encrypted1 = cipher.update(message,"utf-8");
+    var encrypted2 = cipher.final();
 
-module.exports = {
-    func: func
+    return Buffer.concat([encrypted1, encrypted2, iv, cipher.getAuthTag()]).toString("base64");
 };
+
+const decryptDataAES256GCM = (encrypted, key) => {
+    encrypted = Buffer.from(encrypted, "base64");
+    var iv = encrypted.slice(encrypted.length - 28, encrypted.length - 16);
+    var tag = encrypted.slice(encrypted.length - 16);
+    encrypted = encrypted.slice(0, encrypted.length - 28);
+
+    var decipher = Crypto.createDecipheriv(AES_256_GCM, key, iv);
+    decipher.setAuthTag(tag);
+
+    var message = decipher.update(encrypted, null, "utf-8");
+    message += decipher.final("utf-8");
+
+    return message;
+};
+
+module.exports = { encryptDataAES256GCM, decryptDataAES256GCM };

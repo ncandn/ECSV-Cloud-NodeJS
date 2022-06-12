@@ -6,14 +6,12 @@ const middleware = require("../scripts/middleware/token");
 
 router.get("/GetDevices", middleware.verifyToken, edgeController.getDevices);
 
-router.get("/GetInfo/:id", edgeController.getInfo);
+router.get("/GetInfo/:id", middleware.verifyToken, edgeController.getInfo);
 
 router.post("/CreateDevice", edgeController.createDevice);
 
 router.put("/SaveDevice/:id", edgeController.registerDeviceProp);
 
 router.put("/UpdateReading/:id", edgeController.updateReading);
-
-router.delete("/RemoveDevice/:id", edgeController.removeDevice);
 
 module.exports = router;

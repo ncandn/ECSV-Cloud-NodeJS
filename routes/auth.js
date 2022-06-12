@@ -10,4 +10,6 @@ router.post("/SaveUser", userController.saveUser);
 
 router.post("/AddDevice", middleware.verifyToken, userController.addDevice);
 
+router.post("/RemoveDevice", middleware.verifyToken, userController.removeDevice);
+
 module.exports = router;
