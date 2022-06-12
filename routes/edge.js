@@ -6,7 +6,7 @@ const middleware = require("../scripts/middleware/token");
 
 router.get("/GetDevices", middleware.verifyToken, edgeController.getDevices);
 
-router.get("/GetInfo/:id", middleware.verifyToken, edgeController.getInfo);
+router.get("/GetInfo/:deviceUUID", middleware.verifyToken, edgeController.getInfo);
 
 router.post("/CreateDevice", edgeController.createDevice);
 
