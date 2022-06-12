@@ -158,7 +158,7 @@ const getInfo = async (req, res, next) => {
     const email = req.user && req.user.email ? req.user.email : null;
 
     try {
-        if (deviceID && email) {
+        if (deviceUUID && email) {
             const device = await Device.findOne({_id: deviceUUID});
 
             if (!device) {
