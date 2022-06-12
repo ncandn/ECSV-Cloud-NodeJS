@@ -28,7 +28,6 @@ const getDevices = async (req, res, next) => {
 
 const createDevice = async (req, res, next) => {
     const deviceID = req.body?.deviceID;
-    const deviceName = req.body?.deviceName;
 
     try {
         if (deviceID) {
@@ -38,7 +37,7 @@ const createDevice = async (req, res, next) => {
             if (!deviceExists) {
                 const newDevice = await Device.create({
                     id: deviceHMAC,
-                    name: deviceName || "ECSV Device",
+                    name: "ECSV Device",
                     status: "Pending"
                 });
 
@@ -155,13 +154,12 @@ const updateReading = async (req, res, next) => {
 };
 
 const getInfo = async (req, res, next) => {
-    const deviceID = req.params?.id;
+    const deviceUUID = req.params?.deviceUUID;
     const email = req.user && req.user.email ? req.user.email : null;
 
     try {
         if (deviceID && email) {
-            var deviceHMAC = Crypto.createHmac("sha256", DEVICE_HMAC).update(deviceID).digest("hex");
-            const device = await Device.findOne({id: deviceHMAC});
+            const device = await Device.findOne({_id: deviceUUID});
 
             if (!device) {
                 throw new Error("Device could not be found.");

@@ -91,6 +91,7 @@ const saveUser = async (req, res, next) => {
 
 const addDevice = async (req, res, next) => {
     const deviceID = req.body?.deviceID;
+    const deviceName = req.body?.deviceName;
     const email = req.user && req.user.email ? req.user.email : null;
 
     try {
@@ -100,22 +101,25 @@ const addDevice = async (req, res, next) => {
             if (!device) {
                 throw new Error("Couldn't find the device with the ID of " + deviceID + ".");
             }
-    
+
             if (device.status != "Pending") {
                 throw new Error("This device is not available.");
             }
-    
+
             const user = await User.findOne({email: email});
             if (!user) {
                 throw new Error("Users must login.");
             }
-    
+
             device.status = "Owned";
+            if (deviceName) {
+                device.name = deviceName;
+            }
             await device.save();
-    
+
             user.devices.push(device);
             await user.save();
-    
+
             res.status(200).json(user);
         } else {
             throw new Error("Missing information.");
@@ -131,13 +135,13 @@ const addDevice = async (req, res, next) => {
 };
 
 const removeDevice = async (req, res, next) => {
-    const deviceID = req.body?.deviceID;
+    const deviceUUID = req.body?.deviceUUID;
     const email = req.user && req.user.email ? req.user.email : null;
 
     try {
         if (deviceID && email) {
-            var deviceHMAC = Crypto.createHmac("sha256", DEVICE_HMAC).update(deviceID).digest("hex");
-            const device = await Device.findOne({id: deviceHMAC});
+            const device = await Device.findOne({_id: deviceUUID});
+
             if (!device) {
                 throw new Error("Couldn't find the device with the ID of " + deviceID + ".");
             }
