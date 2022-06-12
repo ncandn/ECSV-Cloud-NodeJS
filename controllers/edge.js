@@ -27,7 +27,7 @@ const getDevices = async (req, res, next) => {
 };
 
 const createDevice = async (req, res, next) => {
-    const deviceID = req.body?.deviceID;
+    const deviceID = req.body?.deviceID.toString();
 
     try {
         if (deviceID) {
@@ -62,7 +62,7 @@ const createDevice = async (req, res, next) => {
 };
 
 const registerDeviceProp = async (req, res, next) => {
-    const deviceID = req.params?.id;
+    const deviceID = req.params?.id.toString();
     const incomingSensor = {
         id: req.body?.sensorID,
         type: req.body?.type
