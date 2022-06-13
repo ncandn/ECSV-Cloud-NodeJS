@@ -9,7 +9,7 @@ const readingSchema = new mongoose.Schema({
         enum: ["celcius", "g.m^-3", "ppm"]
     },
     value: {
-        type: Number,
+        type: String,
         required: true
     },
     sensor: {
