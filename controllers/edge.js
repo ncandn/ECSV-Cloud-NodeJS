@@ -5,7 +5,9 @@ const { Sensor } = require("../models/device");
 const { Reading } = require("../models/device");
 const User = require("../models/user");
 const Crypto = require("crypto");
+const cryptoHelpers = require("../scripts/crypto");
 const DEVICE_HMAC = process.env.DEVICE_HMAC;
+const READING_KEY = process.env.READING_KEY;
 
 const getDevices = async (req, res, next) => {
     try {
@@ -178,7 +180,14 @@ const getInfo = async (req, res, next) => {
             });
 
             if (userHasDevice) {
-                res.status(200).json(device);
+                var formattedDevice = device;
+                for (var sn in formattedDevice.sensors) {
+                    if (formattedDevice.sensors[sn] && formattedDevice.sensors[sn].reading) {
+                        formattedDevice.sensors[sn].reading.value = cryptoHelpers.decryptDataAES128ECB(formattedDevice.sensors[sn].reading.value, READING_KEY);
+                    }
+                }
+
+                res.status(200).json(formattedDevice);
             } else {
                 res.status(404).json({
                     error: true,
