@@ -6,6 +6,7 @@ const { Reading } = require("../models/device");
 const User = require("../models/user");
 const Crypto = require("crypto");
 const DEVICE_HMAC = process.env.DEVICE_HMAC;
+const cryptoHelpers = require("../scripts/crypto");
 
 const getDevices = async (req, res, next) => {
     try {
@@ -103,7 +104,6 @@ const registerDeviceProp = async (req, res, next) => {
 
 const updateReading = async (req, res, next) => {
     const sensorID = req.params?.id;
-    console.log(req.params?.id)
     const readings = {
         unit: req.body?.unit,
         value: req.body?.value
@@ -122,6 +122,14 @@ const updateReading = async (req, res, next) => {
                 await Reading.deleteOne({sensor: newSensor._id, unit: readings.unit});
                 console.log("Previous reading is deleted successfully.");
             }
+
+            console.log("PRE DECRYPT 128" + readings.value);
+
+            if (readings.value) {
+                readings.value = cryptoHelpers.decryptDataAES128ECB(readings.value, process.env.READING_KEY);
+            }
+
+            console.log("POST DECRYPT 128" + readings.value);
 
             const reading = await Reading.create({
                 unit: readings.unit,

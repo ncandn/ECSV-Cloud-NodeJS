@@ -2,6 +2,7 @@
 
 const Crypto = require("crypto");
 const AES_256_GCM = "aes-256-gcm";
+const AES_128_ECB = "aes-128-ecb";
 
 const encryptDataAES256GCM = (message, key, iv) => {
     var cipher = Crypto.createCipheriv(AES_256_GCM, key, iv);
@@ -26,4 +27,14 @@ const decryptDataAES256GCM = (encrypted, key) => {
     return message;
 };
 
-module.exports = { encryptDataAES256GCM, decryptDataAES256GCM };
+const decryptDataAES128ECB = (encrypted, key) => {
+    encrypted = Buffer.from(encrypted, "base64");
+    var decipher = Crypto.createDecipheriv(AES_128_ECB, key, null);
+
+    var message = decipher.update(encrypted, null, "utf-8");
+    message += decipher.final("utf-8");
+
+    return message;
+};
+
+module.exports = { encryptDataAES256GCM, decryptDataAES256GCM, decryptDataAES128ECB };
