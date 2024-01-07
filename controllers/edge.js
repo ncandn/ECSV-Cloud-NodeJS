@@ -123,13 +123,9 @@ const updateReading = async (req, res, next) => {
                 console.log("Previous reading is deleted successfully.");
             }
 
-            console.log("PRE DECRYPT " + readings.value);
-
             if (readings.value) {
-                readings.value = cryptoHelpers.decryptDataAES128ECB(readings.value, process.env.READING_KEY);
+                readings.value = cryptoHelpers.encryptDataAES128CBC(readings.value, process.env.READING_KEY, new Crypto.randomBytes(16));
             }
-
-            console.log("POST DECRYPT " + readings.value);
 
             const reading = await Reading.create({
                 unit: readings.unit,

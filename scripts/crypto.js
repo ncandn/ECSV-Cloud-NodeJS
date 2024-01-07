@@ -2,7 +2,7 @@
 
 const Crypto = require("crypto");
 const AES_256_GCM = "aes-256-gcm";
-const AES_128_ECB = "aes-128-ecb";
+const AES_128_CBC = "aes-128-cbc";
 
 const encryptDataAES256GCM = (message, key, iv) => {
     var cipher = Crypto.createCipheriv(AES_256_GCM, key, iv);
@@ -27,16 +27,16 @@ const decryptDataAES256GCM = (encrypted, key) => {
     return message;
 };
 
-const encryptDataAES128ECB = () => {
-    var cipher = Crypto.createCipheriv(AES_128_ECB, process.env.READING_KEY, null);
-    var encrypted1 = cipher.update("42", "utf-8");
+const encryptDataAES128CBC = (message, key, iv) => {
+    var cipher = Crypto.createCipheriv(AES_128_CBC, key, iv);
+    var encrypted1 = cipher.update(message, "utf-8");
     var encrypted2 = cipher.final();
 
     return Buffer.concat([encrypted1, encrypted2]).toString("hex");
 };
 
-const decryptDataAES128ECB = (encrypted, key) => {
-    var decipher = Crypto.createDecipheriv(AES_128_ECB, key, null);
+const decryptDataAES128CBC = (encrypted, key) => {
+    var decipher = Crypto.createDecipheriv(AES_128_CBC, key, null);
 
     let decryptedBuffer = Buffer.concat([decipher.update(Buffer.from(encrypted, 'hex')), decipher.final()]);
     const decryptedMessage = decryptedBuffer.toString('utf8');
@@ -44,4 +44,4 @@ const decryptDataAES128ECB = (encrypted, key) => {
     return decryptedMessage;
 };
 
-module.exports = { encryptDataAES256GCM, decryptDataAES256GCM, encryptDataAES128ECB, decryptDataAES128ECB };
+module.exports = { encryptDataAES256GCM, decryptDataAES256GCM, encryptDataAES128CBC, decryptDataAES128CBC };
