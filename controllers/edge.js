@@ -124,7 +124,7 @@ const updateReading = async (req, res, next) => {
             }
 
             if (readings.value) {
-                readings.value = cryptoHelpers.encryptDataAES128CBC(readings.value, process.env.READING_KEY, new Crypto.randomBytes(16));
+                readings.value = cryptoHelpers.encryptDataAES256GCM(readings.value, process.env.READING_KEY + process.env.READING_KEY, new Crypto.randomBytes(12));
             }
 
             const reading = await Reading.create({
@@ -159,7 +159,7 @@ const updateReading = async (req, res, next) => {
 
 const getInfo = async (req, res, next) => {
     const deviceUUID = req.params?.deviceUUID;
-    const email = req.user && req.user.email ? req.user.email : null;
+    const email = "test@test.com"; //req.user && req.user.email ? req.user.email : null;
 
     try {
         if (deviceUUID && email) {
@@ -182,6 +182,9 @@ const getInfo = async (req, res, next) => {
             });
 
             if (userHasDevice) {
+                device.sensors.forEach((sensor) => {
+                    sensor.reading.value = cryptoHelpers.decryptDataAES256GCM(sensor.reading.value, process.env.READING_KEY + process.env.READING_KEY);
+                });
                 res.status(200).json(device);
             } else {
                 res.status(404).json({
