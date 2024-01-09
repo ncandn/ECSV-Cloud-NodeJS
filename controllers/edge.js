@@ -183,7 +183,7 @@ const getInfo = async (req, res, next) => {
 
             if (userHasDevice) {
                 device.sensors.forEach((sensor) => {
-                    sensor.reading.value = cryptoHelpers.decryptDataAES256GCM(sensor.reading.value, process.env.READING_KEY + process.env.READING_KEY);
+                    sensor.reading.value = Number(cryptoHelpers.decryptDataAES256GCM(sensor.reading.value, process.env.READING_KEY + process.env.READING_KEY));
                 });
                 res.status(200).json(device);
             } else {
