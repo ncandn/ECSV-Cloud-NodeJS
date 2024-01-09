@@ -32,16 +32,20 @@ const encryptDataAES128CBC = (message, key, iv) => {
     var encrypted1 = cipher.update(message, "utf-8");
     var encrypted2 = cipher.final();
 
-    return Buffer.concat([encrypted1, encrypted2]).toString("hex");
+    return Buffer.concat([encrypted1, encrypted2]).toString("base64");
 };
 
 const decryptDataAES128CBC = (encrypted, key) => {
-    var decipher = Crypto.createDecipheriv(AES_128_CBC, key, null);
+    encrypted = Buffer.from(encrypted, "base64");
+    var iv = encrypted.slice(0, 16);
+    encrypted = encrypted.slice(16);
 
-    let decryptedBuffer = Buffer.concat([decipher.update(Buffer.from(encrypted, 'hex')), decipher.final()]);
-    const decryptedMessage = decryptedBuffer.toString('utf8');
+    var decipher = Crypto.createDecipheriv(AES_128_CBC, key, iv);
 
-    return decryptedMessage;
+    var message = decipher.update(encrypted, null, "utf-8");
+    message += decipher.final("utf-8");
+
+    return message;
 };
 
 module.exports = { encryptDataAES256GCM, decryptDataAES256GCM, encryptDataAES128CBC, decryptDataAES128CBC };
